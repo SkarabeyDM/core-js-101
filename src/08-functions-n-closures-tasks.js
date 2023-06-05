@@ -8,7 +8,6 @@
  *                                                                                             *
  ********************************************************************************************* */
 
-
 /**
  * Returns the functions composition of two specified functions f(x) and g(x).
  * The result of compose is to be a function of one argument, (lets call the argument x),
@@ -23,10 +22,9 @@
  *   getComposition(Math.sin, Math.asin)(x) => Math.sin(Math.asin(x))
  *
  */
-function getComposition(/* f, g */) {
-  throw new Error('Not implemented');
+function getComposition(f, g) {
+  return (...args) => f(g(...args));
 }
-
 
 /**
  * Returns the math power function with the specified exponent
@@ -44,16 +42,15 @@ function getComposition(/* f, g */) {
  *   power05(16) => 4
  *
  */
-function getPowerFunction(/* exponent */) {
-  throw new Error('Not implemented');
+function getPowerFunction(exponent) {
+  return (num) => num ** exponent;
 }
-
 
 /**
  * Returns the polynom function of one argument based on specified coefficients.
  * See: https://en.wikipedia.org/wiki/Polynomial#Definition
  *
- * @params {integer}
+ * @param {...number} integers
  * @return {Function}
  *
  * @example
@@ -62,10 +59,51 @@ function getPowerFunction(/* exponent */) {
  *   getPolynom(8)     => y = 8
  *   getPolynom()      => null
  */
-function getPolynom() {
-  throw new Error('Not implemented');
-}
+function getPolynom(...integers) {
+  /* const getPolynomString = () => {
+    const polynom = [];
+    for (let i = 0; i < integers.length; i += 1) {
+      const num = integers[i];
+      const getExponent = (exp) => {
+        let str;
+        if (exp <= 0) {
+          str = '';
+        } else if (exp === 1) {
+          str = 'x';
+        } else str = `x^${exp}`;
+        return str;
+      };
+      const getSign = (number) => (Math.sign(number) >= 0 ? '+' : '-');
+      const getCoeff = (number) => (number === 1 ? '' : `${number}`);
+      const display = (value) => !(value === '0' || value === '1');
 
+      const exponent = getExponent(integers.length - i - 1);
+      const sign = getSign(num);
+      const coeff = getCoeff(Math.abs(num));
+
+      const value = coeff + exponent;
+      if (display(value)) {
+        if (i === 0) {
+          if (sign === '-') polynom.push(`-${value}`);
+          else polynom.push(value);
+        } else {
+          polynom.push(sign, value);
+        }
+      }
+    }
+    return polynom.join(' ');
+  }; */
+  const calcMonomial = ({ exponent, coefficient }, x) => (x ** exponent) * coefficient;
+  const polynom = [];
+  for (let i = 0; i < integers.length; i += 1) {
+    const exponent = integers.length - i - 1;
+    const coefficient = integers[i];
+    polynom.push({ exponent, coefficient });
+  }
+  /* console.log(getPolynomString()); */
+  return (x) => polynom.reduce((sum, monomial) => sum + calcMonomial(monomial, x), 0);
+}
+getPolynom(1, -3);
 
 /**
  * Memoizes passed function and returns function
@@ -81,10 +119,10 @@ function getPolynom() {
  *   ...
  *   memoizer() => the same random number  (next run, returns the previous cached result)
  */
-function memoize(/* func */) {
-  throw new Error('Not implemented');
+function memoize(func) {
+  const number = func();
+  return () => number;
 }
-
 
 /**
  * Returns the function trying to call the passed function and if it throws,
@@ -101,10 +139,18 @@ function memoize(/* func */) {
  * }, 2);
  * retryer() => 2
  */
-function retry(/* func, attempts */) {
-  throw new Error('Not implemented');
+function retry(func, attempts) {
+  return () => {
+    for (let a = 1; a <= attempts;) {
+      try {
+        return func();
+      } catch (error) {
+        a += 1;
+      }
+    }
+    return undefined;
+  };
 }
-
 
 /**
  * Returns the logging wrapper for the specified method,
@@ -129,10 +175,18 @@ function retry(/* func, attempts */) {
  * cos(3.141592653589793) ends
  *
  */
-function logger(/* func, logFunc */) {
-  throw new Error('Not implemented');
-}
+function logger(func, logFunc) {
+  return (...args) => {
+    const funcName = func.name;
+    const argString = JSON.stringify(args).slice(1, -1);
+    const log = `${funcName}(${argString})`;
+    logFunc(`${log} starts`);
+    const result = func(...args);
+    logFunc(`${log} ends`);
 
+    return result;
+  };
+}
 
 /**
  * Return the function with partial applied arguments
@@ -147,10 +201,9 @@ function logger(/* func, logFunc */) {
  *   partialUsingArguments(fn, 'a','b','c')('d') => 'abcd'
  *   partialUsingArguments(fn, 'a','b','c','d')() => 'abcd'
  */
-function partialUsingArguments(/* fn, ...args1 */) {
-  throw new Error('Not implemented');
+function partialUsingArguments(fn, ...args1) {
+  return (...args2) => fn(...args1, ...args2);
 }
-
 
 /**
  * Returns the id generator function that returns next integer starting
@@ -169,10 +222,13 @@ function partialUsingArguments(/* fn, ...args1 */) {
  *   getId4() => 7
  *   getId10() => 11
  */
-function getIdGeneratorFunction(/* startFrom */) {
-  throw new Error('Not implemented');
+function getIdGeneratorFunction(startFrom) {
+  let id = startFrom;
+  return () => {
+    id += 1;
+    return id - 1;
+  };
 }
-
 
 module.exports = {
   getComposition,
