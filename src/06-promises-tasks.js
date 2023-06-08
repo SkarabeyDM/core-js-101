@@ -5,7 +5,6 @@
  *                                                                                                *
  ************************************************************************************************ */
 
-
 /**
  * Return Promise object that is resolved with string value === 'Hooray!!! She said "Yes"!',
  * if boolean value === true is passed, resolved with string value === 'Oh no, she said "No".',
@@ -28,10 +27,13 @@
  *      .catch((error) => console.log(error.message)) // 'Error: Wrong parameter is passed!
  *                                                    //  Ask her again.';
  */
-function willYouMarryMe(/* isPositiveAnswer */) {
-  throw new Error('Not implemented');
+function willYouMarryMe(isPositiveAnswer) {
+  return new Promise((resolve) => {
+    if (typeof isPositiveAnswer !== 'boolean') throw new Error('Wrong parameter is passed! Ask her again.');
+    const answer = isPositiveAnswer ? 'Hooray!!! She said "Yes"!' : 'Oh no, she said "No".';
+    resolve(answer);
+  });
 }
-
 
 /**
  * Return Promise object that should be resolved with array containing plain values.
@@ -48,8 +50,9 @@ function willYouMarryMe(/* isPositiveAnswer */) {
  *    })
  *
  */
-function processAllPromises(/* array */) {
-  throw new Error('Not implemented');
+async function processAllPromises(array) {
+  const arr = await Promise.all(array);
+  return arr;
 }
 
 /**
@@ -71,8 +74,9 @@ function processAllPromises(/* array */) {
  *    })
  *
  */
-function getFastestPromise(/* array */) {
-  throw new Error('Not implemented');
+async function getFastestPromise(array) {
+  const rejected = await Promise.race(array);
+  return rejected;
 }
 
 /**
@@ -80,7 +84,7 @@ function getFastestPromise(/* array */) {
  * a result of action with values of all the promises that exists in array.
  * If some of promise is rejected you should catch it and process the next one.
  *
- * @param {Promise[]} array
+ * @param {Promise[]} promises
  * @param {Function} action
  * @return {Promise}
  *
@@ -92,8 +96,28 @@ function getFastestPromise(/* array */) {
  *    });
  *
  */
-function chainPromises(/* array, action */) {
-  throw new Error('Not implemented');
+async function chainPromises(promises, action) {
+  const results = [];
+  await new Promise((resolve) => {
+    if (!promises.length) resolve([]);
+    else {
+      promises.forEach((promise, i) => {
+        if (promise instanceof Promise) {
+          promise.then((value) => {
+            results.push(value);
+            if (i + 1 === promises.length) {
+              resolve(results);
+            }
+          }).catch(() => { });
+        } else results.push(promise);
+        if (i + 1 === promises.length) {
+          resolve(results);
+        }
+      });
+    }
+  });
+  const answer = results.reduce(action);
+  return answer;
 }
 
 module.exports = {
